@@ -3,6 +3,7 @@ package cardGame;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.InputMismatchException;
 
 public class CardBattler {
 	//NOTE: Red is Intellisense, the bot.
@@ -36,20 +37,63 @@ public class CardBattler {
 		int toPlace = 0; //This variable represents the card that was drawn
 		
 		// This while loop ensures that the game only ends once both sides have used up all their cards (a.k.a. the game is still running
+		System.out.println("\nPlease choose a difficulty level");
+		System.out.println("A: You add a 1 card to a random column 4 times");
+		System.out.println("B: You add a 1 card to a random column 2 times");
+		System.out.println("C: Standard rules");
+		System.out.println("D: Intellisense adds a 1 card to a random column 3 times");
+		System.out.println("Please enter \"A\", \"B\", \"C\", or \"D\"");
+		boolean validReply = false;
+		while(!validReply) {
+			String reply = read.next();
+			reply.toUpperCase();
+			if((reply.equals("A") || reply.equals("B") || reply.equals("C") || reply.equals("D"))) {
+				validReply = true;
+				if(reply.equals("A")) {
+					for(int i = 0; i < 4; i++) {
+						int location = (int)(Math.random() * numColumns);
+						blueValue[location]++;	
+					}
+					System.out.println("You have selected difficulty A!");
+				} else if(reply.equals("B")) {
+					for(int i = 0; i < 2; i++) {
+						int location = (int)(Math.random() * numColumns);
+						blueValue[location]++;	
+					}
+					System.out.println("You have selected difficulty B!");
+				} else if(reply.equals("D")){ 
+					for(int i = 0; i < 3; i++) {
+						int location = (int)(Math.random() * numColumns);
+						redValue[location]++;	
+					}
+					System.out.println("You have selected difficulty D!");
+				} else { //reply was "C"
+					System.out.println("You have selected difficulty C!");
+				}
+			} 
+			if(!validReply) {
+				System.out.println("Please enter \"A\", \"B\", \"C\", or \"D\"");
+			}
+		}
 		while(cardsBlue.size() != 0 && cardsRed.size() != 0) { 
 			//Blue's turn
 			toPlace = drawCard("blue"); 
-			System.out.println("\nYou have drawn the " + toPlace + " card. \nSelect the column you want to place it! (1~" + numColumns + ")");
 			int location = 0; //This represents which column the card was assigned
 			boolean validLocation = false; //This variable checks if the player entered a valid value
 			while(!validLocation) {
-				location = read.nextInt();
-				for(int i = 1; i <= numColumns; i++) {
-					if(location == i) {
-						validLocation = true;
-						break;
+				try {
+					System.out.println("\nYou have drawn the " + toPlace + " card. \nSelect the column you want to place it! (1~" + numColumns + ")");
+			        location = read.nextInt();
+			        for(int i = 1; i <= numColumns; i++) {
+						if(location == i) {
+							validLocation = true;
+							break;
+						}
 					}
-				}
+			    } catch (InputMismatchException e) {
+			        System.out.println("Invalid input. Please enter a valid number.");
+			        read.next();
+			    }	
 				if(!validLocation) {
 					System.out.println("Invalid column! Please enter an integer between 1 and " + numColumns + ".");
 				}
@@ -132,8 +176,14 @@ public class CardBattler {
 		}
 		for(int x = (numColumns-1); x >= 0; x--) { //Assess each column
 			int pointValue = 0; //Internal score rating of the column in question
-			if((redValue[x]) > (10 + blueValue[x])) { 
-				//Already winning by a lot, no need to reinforce
+			int maxCard = 0;
+			for(int i = 0; i < cardsBlue.size(); i++) { //This is the highest card value in the player's hand
+				if(cardsBlue.get(i) > maxCard) {
+					maxCard = cardsBlue.get(i);
+				}
+			}
+			if((redValue[x]) > (maxCard + blueValue[x])) { 
+				//Already winning by one turn, no need to reinforce yet
 			} else if((redPower + redValue[x]) < blueValue[x]) { 
 				//Give up because it's impossible to win
 			} else { 
