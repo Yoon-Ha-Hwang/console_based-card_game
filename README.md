@@ -17,3 +17,4 @@ Intellisense uses a "what-if" mechanism and evaluates the gains from adding a ca
 
 # Credits
 I used Google Lens once on how to resolve the issue when a user enters alphabets instead of numbers when prompted to enter a number.
+The Rural Coders Society, for providing guidance on how to publish my first project. Website: https://www.ruralcoderssociety.org/
