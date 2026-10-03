@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class CardBattler {
-	//NOTE: Player red is the computer.
+	//NOTE: Red is Intellisense, the bot.
 	
 	//These are the standard cards players start with (each player has their own set of cards)
 	static ArrayList<Integer> cardsBlue = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
@@ -21,26 +21,27 @@ public class CardBattler {
 	//This is how much a column is worth in game points
 	static final int[] columnValues = {4, 5, 6, 7, 8, 9};
 	
-	//Score tracker
+	//Score tracker, used when counting points in the end
 	static int blueScore = 0;
 	static int redScore = 0;
 		    
 	static Scanner read = new Scanner(System.in);
 	
 	public static void main(String[] args) {
-		System.out.println("Column Battler Game! \nHave more points in a column than your opponent to win the column.\nDeploy cards in the column to increase your points in the column!");
+		System.out.println("Column Battler Game! \nHave more sum of cards in a column that your opponent to win points for the column.\nWhoever scores more points wins!");
+		System.out.println("\nYou will play against Intellisense, a bot.");
 		for(int i = 0; i < numColumns; i++) {
 			System.out.println("Column " + (i+1) + " is worth " + columnValues[i] + " points");
 		}
-		int toPlace = 0; //This variable represents the card the players drew
+		int toPlace = 0; //This variable represents the card that was drawn
 		
-		// This while loop ensures that the game only ends once both players have used up all their cards (a.k.a. the game is still running
+		// This while loop ensures that the game only ends once both sides have used up all their cards (a.k.a. the game is still running
 		while(cardsBlue.size() != 0 && cardsRed.size() != 0) { 
 			//Blue's turn
 			toPlace = drawCard("blue"); 
-			System.out.println("\nYou have drawn the " + toPlace + " card. \nSelect the column you want to place it! (1~6)");
-			int location = 0; //This represents which column the players assigned the card
-			boolean validLocation = false; //This variable checks if the user entered a valid value
+			System.out.println("\nYou have drawn the " + toPlace + " card. \nSelect the column you want to place it! (1~" + numColumns + ")");
+			int location = 0; //This represents which column the card was assigned
+			boolean validLocation = false; //This variable checks if the player entered a valid value
 			while(!validLocation) {
 				location = read.nextInt();
 				for(int i = 1; i <= numColumns; i++) {
@@ -50,54 +51,54 @@ public class CardBattler {
 					}
 				}
 				if(!validLocation) {
-					System.out.println("Invalid column! Please enter an integer between 1 and 6 (inclusive");
+					System.out.println("Invalid column! Please enter an integer between 1 and " + numColumns + ".");
 				}
-			} //The user can only exit this loop until they entered a valid value
+			} //The player can only exit this loop until they entered a valid value
 			System.out.println("You have placed the " + toPlace + " card at column " + location + "!");
 			location--; //User enters 1~6, computer processes 0~5
 			blueValue[location] += toPlace;
 			printStatus();
 		
-			//Red's turn
+			//Intellisense's turn
 			toPlace = drawCard("red");
 			location = red(toPlace);
-			System.out.println("\nRed placed the " + toPlace + " card at column " + (location+1) + "!");
+			System.out.println("\nIntellisense placed the " + toPlace + " card at column " + (location+1) + "!");
 			redValue[location] += toPlace;
 			printStatus();
 		}
 		
 
 		//Scoring logic
-		System.out.println("\nLet's count our points!");
+		System.out.println("\n\nGame finished! \nLet's count our points!");
 		for(int i = 0; i < numColumns; i++) {
 			if(redValue[i] > blueValue[i]) {
-				System.out.println("Red has won column " + (i+1) + "! " + columnValues[i] + " points for Red!");
+				System.out.println("Intellisense has won column " + (i+1) + "! " + columnValues[i] + " points for Intellisense!");
 				redScore += columnValues[i];
 			} else if(blueValue[i] > redValue[i]) {
-				System.out.println("Blue has won column " + (i+1) + "! " + columnValues[i] + " points for Blue!");
+				System.out.println("You won column " + (i+1) + "'s " + columnValues[i] + " points!");
 				blueScore += columnValues[i];
 			} else { //Draw
 				System.out.println("Column " + (i+1) + " was tied!");
 			}
 		}
 		
-		//Print results
-		System.out.println("Red: " + redScore + " points");
-		System.out.println("Blue: " + blueScore + " points");
+		//Print results	
+		System.out.println("You: " + blueScore + " points");
+		System.out.println("Intellisense: " + redScore + " points");
 		
 		//Determine winner
 		if(redScore > blueScore) {
-			System.out.println("Red wins!");
+			System.out.println("Intellisense wins!");
 		} else if(blueScore > redScore) {
-			System.out.println("Blue wins!");
+			System.out.println("You win!");
 		} else { //Draw
 			System.out.println("It's a draw!");
 		}
 	}
 	
-	//This method simulates a random card drawn from the player's deck
+	//This method simulates a random card drawn from the deck
 	public static int drawCard(String player) {
-		int cardDrawn = 0; //This represents the card the players drew
+		int cardDrawn = 0; //This represents the card drawn
 		if(player.equals("blue")) {
 			cardDrawn = cardsBlue.remove((int)(Math.random() * cardsBlue.size()));
 		} else { //Player is red
@@ -117,34 +118,60 @@ public class CardBattler {
 		}
 	}
 	
-	//This method simulates the Red's actions
+	//This method simulates Intellisense's actions
 	public static int red(int card) {
-		int columnChosen = 0;
-		int bestPoints = 0; //This is the internal score rating
-		for(int x = 0; x < numColumns; x++) {
-			int[] ifRed = new int[numColumns]; //Internal experiment arrayLists
-			int[] ifBlue = new int[numColumns];
-			for(int i = 0; i < numColumns; i++) { //Clone arrayLists
-				ifRed[i] = redValue[i];
-				ifBlue[i] = blueValue[i];
+		int columnChosen = (numColumns-1); //The column where Intellisense thinks is the best place to put the card
+		int bestPoints = 0; //This is the internal score rating of the best column
+		int redPower = 0; //Remaining cards' value for Intellisense
+		int bluePower = 0; //Remaining cards' value of the player
+		for(int i = 0; i < redValue.length; i++) { //Calculate remaining cards' value for Intellisense
+			redPower += redValue[i];
+		}
+		for(int i = 0; i < blueValue.length; i++) { //Calculate remaining cards' value for the player
+			bluePower += blueValue[i];
+		}
+		for(int x = (numColumns-1); x >= 0; x--) { //Assess each column
+			int pointValue = 0; //Internal score rating of the column in question
+			if((redValue[x]) > (10 + blueValue[x])) { 
+				//Already winning by a lot, no need to reinforce
+			} else if((redPower + redValue[x]) < blueValue[x]) { 
+				//Give up because it's impossible to win
+			} else { 
+				//Only then consider adding the card to this column
+				if(redValue[x] < blueValue[x]) { //We are losing in this column right now
+					if((redValue[x] + card) > blueValue[x]) { 
+						//I am losing right now, but if I drop the card here, I can retake it (priority consideration)
+						pointValue = columnValues[x] * 200; //Emphasis on changing control of column
+					} else if ((redValue[x] + card) == blueValue[x]) { 
+						//I can prevent the player from getting points on this column by making it a draw (big consideration)
+						pointValue = columnValues[x] * 100;
+					} else {
+						//Emphasis on closing the gap
+						pointValue = columnValues[x] * (100 - (blueValue[x] - redValue[x] - card));
+					}
+				} else if (redValue[x] > blueValue[x]) { //Winning in this column right now 
+					if(cardsBlue.isEmpty()) { 
+						//If I am winning and the player has no cards left, there's absolutely no reason to add a card here
+						pointValue = Integer.MIN_VALUE;
+					} else if((cardsBlue.size() == 1) && ((redPower + redValue[x]) < (bluePower + blueValue[x]))) { 
+						//The player have their last card, and if the player uses it on this column they will win in the end, even if I put my remaining cards here
+						pointValue = Integer.MIN_VALUE;
+					} else {
+						pointValue = (int)(columnValues[x] * 50 - Math.pow(redValue[x] - blueValue[x] + card , 2)); //Dis-incentive for overkill 
+					}
+				} else { //Draw in this column right now
+					pointValue = columnValues[x] * 100 - card; //Win it but not by a lot
+				}
 			}
-			int oldPoints = assessPoints(ifRed, ifBlue);
-			ifRed[x] += card;
-			int newPoints = assessPoints(ifRed, ifBlue);
-			int changePoints = newPoints - oldPoints;
-			if(changePoints >= bestPoints) {
+			if((card == 1) && (redValue[x] == 0) && (blueValue[x] == 0)) {
+				//A 1 card can be strategically used in an empty column to force a reply or take points uncontested. OVERRIDE all other rules if this is possible.
+				pointValue = 100_000_000 + columnValues[x];
+			}
+			if(bestPoints < pointValue) {
+				bestPoints = pointValue;
 				columnChosen = x;
-				bestPoints = changePoints;
 			}
 		}
 		return columnChosen;
-	}
-	
-	public static int assessPoints(int[] R, int[] B) {
-		int assessResult = 0;
-		for(int i = 0; i < numColumns; i++) {
-			assessResult += (R[i] - 2 * B[i]) * columnValues[i];
-		}
-		return assessResult;
 	}
 }
